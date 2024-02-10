@@ -10,5 +10,5 @@ In this course we will learn about the basics of deep neural networks, and their
 ## HWs
 
 ### HW1
-- P1: Implementation of (mytorch)[hw1/HW1P1/mytorch] and build a MLP with it.
-- P2: MLP model implementation and tuning based on `torch`, through a (Frame-Level Speech Recognition)[https://www.kaggle.com/competitions/11785-hw1p2-s24/] challenge.
+- P1: Implementation of [`mytorch`](hw1/HW1P1/mytorch) and build a MLP with it.
+- P2: MLP model implementation and tuning based on `torch`, through a [Frame-Level Speech Recognition](https://www.kaggle.com/competitions/11785-hw1p2-s24/) challenge.
