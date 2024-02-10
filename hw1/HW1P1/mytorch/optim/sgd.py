@@ -5,7 +5,7 @@ class SGD:
 
     def __init__(self, model, lr=0.1, momentum=0):
 
-        self.l = model.layers
+        self.l = list(filter(lambda x: hasattr(x, "W"), model.layers))
         self.L = len(model.layers)
         self.lr = lr
         self.mu = momentum
@@ -19,13 +19,14 @@ class SGD:
         for i in range(self.L):
 
             if self.mu == 0:
-
-                self.l[i].W = None  # TODO
-                self.l[i].b = None  # TODO
+                # Update weights and biases without momentum
+                self.l[i].W = self.l[i].W - self.lr * self.l[i].dLdW
+                self.l[i].b -= self.lr * self.l[i].dLdb
 
             else:
-
-                self.v_W[i] = None  # TODO
-                self.v_b[i] = None  # TODO
-                self.l[i].W = None  # TODO
-                self.l[i].b = None  # TODO
+                # Update velocities with momentum
+                self.v_W[i] = self.mu * self.v_W[i] - self.lr * self.l[i].dLdW
+                self.v_b[i] = self.mu * self.v_b[i] - self.lr * self.l[i].dLdb
+                # Update weights and biases with momentum
+                self.l[i].W += self.v_W[i]
+                self.l[i].b += self.v_b[i]

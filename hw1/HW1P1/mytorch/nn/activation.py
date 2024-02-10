@@ -1,5 +1,8 @@
 import numpy as np
 import scipy
+import math
+
+from mytorch.nn.module import Module
 
 class Identity:
 
@@ -17,79 +20,64 @@ class Identity:
         return dLdZ
 
 
-class Sigmoid:
-    """
-    On same lines as above:
-    Define 'forward' function
-    Define 'backward' function
-    Read the writeup for further details on Sigmoid.
-    """
-
-
-class Tanh:
-    """
-    On same lines as above:
-    Define 'forward' function
-    Define 'backward' function
-    Read the writeup for further details on Tanh.
-    """
-
-
-class ReLU:
-    """
-    On same lines as above:
-    Define 'forward' function
-    Define 'backward' function
-    Read the writeup for further details on ReLU.
-    """
-
-class GELU:
-    """
-    On same lines as above:
-    Define 'forward' function
-    Define 'backward' function
-    Read the writeup for further details on GELU.
-    """
-
-class Softmax:
-    """
-    On same lines as above:
-    Define 'forward' function
-    Define 'backward' function
-    Read the writeup for further details on Softmax.
-    """
-
+class Sigmoid(Module):
     def forward(self, Z):
-        """
-        Remember that Softmax does not act element-wise.
-        It will use an entire row of Z to compute an output element.
-        """
+        self.A = 1 / (1 + np.exp(-Z))
+        return self.A
 
-        self.A = None # TODO
-
-        return NotImplementedError
-    
     def backward(self, dLdA):
+        dAdZ = self.A * (1 - self.A)
+        dLdZ = dLdA * dAdZ
+        return dLdZ
 
-        # Calculate the batch size and number of features
-        N = None # TODO
-        C = None # TODO
 
-        # Initialize the final output dLdZ with all zeros. Refer to the writeup and think about the shape.
-        dLdZ = None # TODO
+class Tanh(Module):
+    def forward(self, Z):
+        self.A = np.tanh(Z)
+        return self.A
 
-        # Fill dLdZ one data point (row) at a time
+    def backward(self, dLdA):
+        dAdZ = 1 - self.A ** 2
+        dLdZ = dLdA * dAdZ
+        return dLdZ
+
+
+class ReLU(Module):
+    def forward(self, Z):
+        self.A = np.maximum(0, Z)
+        return self.A
+
+    def backward(self, dLdA):
+        dAdZ = (self.A > 0).astype(float)
+        dLdZ = dLdA * dAdZ
+        return dLdZ
+
+
+class GELU(Module):
+    def forward(self, Z):
+        self.Z = Z
+        self.A = 0.5 * Z * (1 + scipy.special.erf(Z / math.sqrt(2)))
+        return self.A
+
+    def backward(self, dLdA):
+        dLdZ = dLdA*(0.5*(1+scipy.special.erf(self.Z/math.sqrt(2)))+(self.Z/math.sqrt(2*math.pi))*np.exp(-self.Z*self.Z/2))
+        return dLdZ
+
+
+class Softmax(Module):
+    def forward(self, Z):
+        Z_exp = np.exp(Z - np.max(Z, axis=1, keepdims=True))
+        self.A = Z_exp / np.sum(Z_exp, axis=1, keepdims=True)
+        return self.A
+
+    def backward(self, dLdA):
+        N, C = dLdA.shape
+        dLdZ = np.zeros((N, C, C))
         for i in range(N):
-
-            # Initialize the Jacobian with all zeros.
-            J = None # TODO
-
-            # Fill the Jacobian matrix according to the conditions described in the writeup
-            for m in range(C):
-                for n in range(C):
-                    J[m,n] = None # TODO
-
-            # Calculate the derivative of the loss with respect to the i-th input
-            dLdZ[i,:] = None # TODO
-
-        return NotImplementedError
+            for j in range(C):
+                for k in range(C):
+                    if j == k:
+                        dLdZ[i, j, k] = self.A[i, j] * (1 - self.A[i, j])
+                    else:
+                        dLdZ[i, j, k] = -self.A[i, j] * self.A[i, k]
+        return np.einsum('ijk,ik->ij', dLdZ, dLdA)

@@ -1,7 +1,10 @@
 import numpy as np
 
+from mytorch.nn.module import Module
+from mytorch.nn import Softmax
 
-class MSELoss:
+
+class MSELoss(Module):
 
     def forward(self, A, Y):
         """
@@ -14,19 +17,19 @@ class MSELoss:
 
         self.A = A
         self.Y = Y
-        self.N = None  # TODO
-        self.C = None  # TODO
-        se = None  # TODO
-        sse = None  # TODO
-        mse = None  # TODO
+        self.N = np.shape(A)[0]  # TODO
+        self.C = np.shape(A)[1]  # TODO
+        se = (self.A - self.Y) ** 2
+        sse = np.sum(se)
+        mse = sse / (self.N * self.C)
 
-        return NotImplemented
+        return mse
 
     def backward(self):
 
-        dLdA = None
+        dLdA = 2 * (self.A - self.Y) / (self.N * self.C)
 
-        return NotImplemented
+        return dLdA
 
 
 class CrossEntropyLoss:
@@ -43,21 +46,20 @@ class CrossEntropyLoss:
         """
         self.A = A
         self.Y = Y
-        N = None  # TODO
-        C = None  # TODO
+        N = A.shape[0]
+        C = A.shape[1]
+        self.N = N
 
-        Ones_C = None  # TODO
-        Ones_N = None  # TODO
+        Ones_C = np.ones(C, dtype='f')
+        Ones_N = np.ones(N, dtype='f')
 
-        self.softmax = None  # TODO
-        crossentropy = None  # TODO
-        sum_crossentropy = None  # TODO
+        self.softmax = Softmax().forward(A)
+        crossentropy = -Y * np.log(self.softmax)
+        sum_crossentropy = np.sum(np.dot(Ones_N.T, crossentropy))
         L = sum_crossentropy / N
 
-        return NotImplemented
+        return L
 
     def backward(self):
-
-        dLdA = None  # TODO
-
-        return NotImplemented
+        dLdA = (self.softmax - self.Y) / self.N
+        return dLdA

@@ -2,72 +2,61 @@ import numpy as np
 
 from mytorch.nn.linear import Linear
 from mytorch.nn.activation import ReLU
+from mytorch.nn import Module
 
 
 class MLP0:
 
     def __init__(self, debug=False):
-        """
-        Initialize a single linear layer of shape (2,3).
-        Use Relu activations for the layer.
-        """
-
-        self.layers = [Linear(2, 3), ReLU()]
+        self.layers: list[Module] = [Linear(2, 3), ReLU()]
         self.debug = debug
 
     def forward(self, A0):
-        """
-        Pass the input through the linear layer followed by the activation layer to get the model output.
-        """
-
-        Z0 = None  # TODO
-        A1 = None  # TODO
+        
+        Z0 = self.layers[0].forward(A0)  # TODO
+        A1 = self.layers[1].forward(Z0)  # TODO
 
         if self.debug:
 
             self.Z0 = Z0
             self.A1 = A1
 
-        return NotImplemented
+        return A1
 
     def backward(self, dLdA1):
-        """
-        Refer to the pseudo code outlined in the writeup to implement backpropogation through the model.
-        """
 
-        dLdZ0 = None  # TODO
-        dLdA0 = None  # TODO
+        dLdZ0 = self.layers[1].backward(dLdA1)  # TODO
+        dLdA0 = self.layers[0].backward(dLdZ0)  # TODO
 
         if self.debug:
 
             self.dLdZ0 = dLdZ0
             self.dLdA0 = dLdA0
 
-        return NotImplemented
+        return dLdA0
 
 
 class MLP1:
 
     def __init__(self, debug=False):
-        """
-        Initialize 2 linear layers. Layer 1 of shape (2,3) and Layer 2 of shape (3, 2).
-        Use Relu activations for both the layers.
-        Implement it on the same lines(in a list) as MLP0
-        """
+        
+        self.l0 = Linear(2, 3)
+        self.f0 = ReLU()
+        self.l1 = Linear(3, 2)
+        self.f1 = ReLU()
+        
+        self.layers = [self.l0, self.f0, self.l1, self.f1]
 
-        self.layers = None  # TODO
         self.debug = debug
 
     def forward(self, A0):
-        """
-        Pass the input through the linear layers and corresponding activation layer alternately to get the model output.
-        """
+        
 
-        Z0 = None  # TODO
-        A1 = None  # TODO
+        Z0 = self.l0.forward(A0)  # TODO
+        A1 = self.f0.forward(Z0)  # TODO
 
-        Z1 = None  # TODO
-        A2 = None  # TODO
+        Z1 = self.l1.forward(A1)# TODO
+        A2 = self.f1.forward(Z1)  # TODO
 
         if self.debug:
             self.Z0 = Z0
@@ -75,18 +64,18 @@ class MLP1:
             self.Z1 = Z1
             self.A2 = A2
 
-        return NotImplemented
+        return A2
 
     def backward(self, dLdA2):
         """
         Refer to the pseudo code outlined in the writeup to implement backpropogation through the model.
         """
 
-        dLdZ1 = None  # TODO
-        dLdA1 = None  # TODO
+        dLdZ1 = self.f1.backward(dLdA2)  # TODO
+        dLdA1 = self.l1.backward(dLdZ1)  # TODO
 
-        dLdZ0 = None  # TODO
-        dLdA0 = None  # TODO
+        dLdZ0 = self.f0.backward(dLdA1)  # TODO
+        dLdA0 = self.l0.backward(dLdZ0)  # TODO
 
         if self.debug:
 
@@ -96,25 +85,27 @@ class MLP1:
             self.dLdZ0 = dLdZ0
             self.dLdA0 = dLdA0
 
-        return NotImplemented
+        return dLdZ0
 
 
 class MLP4:
     def __init__(self, debug=False):
-        """
-        Initialize 4 hidden layers and an output layer of shape below:
-        Layer1 (2, 4),
-        Layer2 (4, 8),
-        Layer3 (8, 8),
-        Layer4 (8, 4),
-        Output Layer (4, 2)
-
-        Refer the diagramatic view in the writeup for better understanding.
-        Use ReLU activation function for all the linear layers.)
-        """
 
         # List of Hidden and activation Layers in the correct order
-        self.layers = None  # TODO
+        self.layers: list[Module] = [
+            Linear(2, 4),
+            ReLU(),
+            Linear(4, 8),
+            ReLU(),
+            Linear(8, 8),
+            ReLU(),
+            Linear(8, 4),
+            ReLU(),
+            Linear(4, 2), 
+            ReLU()   
+        ]  
+        
+        self.L = len(self.layers)
 
         self.debug = debug
 
@@ -127,17 +118,15 @@ class MLP4:
 
             self.A = [A]
 
-        L = len(self.layers)
+        for i in range(self.L):
 
-        for i in range(L):
-
-            A = None  # TODO
+            A = self.layers[i].forward(A)  
 
             if self.debug:
 
                 self.A.append(A)
 
-        return NotImplemented
+        return A
 
     def backward(self, dLdA):
         """
@@ -152,10 +141,10 @@ class MLP4:
 
         for i in reversed(range(L)):
 
-            dLdA = None  # TODO
+            dLdA = self.layers[i].backward(dLdA)
 
             if self.debug:
 
                 self.dLdA = [dLdA] + self.dLdA
 
-        return NotImplemented
+        return dLdA
