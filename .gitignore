@@ -4,6 +4,17 @@
 *.zip
 *.gz
 kaggle.json
+safestore.json
+#Outputs
+*.csv
+*.pkl
+*.npy
+*.txt
+*.npz
+*.pt
+*.pth 
+
+
 
 # macOS shit
 *.DS_Store
@@ -17,6 +28,7 @@ kaggle.json
 __pycache__/
 *.py[cod]
 *$py.class
+*.___pycache__
 
 # C extensions
 *.so
